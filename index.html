@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catatan Tugas Sekolah</title>
+  <style>
+    * {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+  overflow-y: hidden; /* Sembunyikan scroll bar di tingkat body/html */
+}
+
+    body {
+      background: #f1f4f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-size: 1.2rem;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-bottom: 1px solid #ddd;
+    }
+
+    nav button {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #555;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    nav button:hover {
+      color: #1e88e5;
+    }
+
+    nav button.active {
+      color: #1e88e5;
+      font-weight: bold;
+    }
+
+    nav button.active::after {
+      content: "";
+      position: absolute;
+      left: 20%;
+      bottom: 0;
+      width: 60%;
+      height: 3px;
+      background: #1e88e569;
+      border-radius: 5px;
+    }
+
+    .page {
+      display: none;
+      padding: 20px;
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .task-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+      max-width: 500px;
+    }
+
+    input, textarea, button {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    button {
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+
+    .task-list {
+      margin-top: 20px;
+    }
+
+    .task-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    .task-card.today {
+      border-left: 5px solid red;
+      background-color: #fff4f4;
+    }
+
+    .task-card h3 {
+      margin-bottom: 5px;
+    }
+
+    .task-card small {
+      color: gray;
+    }
+
+    .task-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+    .task-actions .edit-btn {
+      background-color: #2196f3;
+      color: white;
+    }
+
+    .task-actions .delete-btn {
+      background-color: #e53935;
+      color: white;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      background: #e3f2fd;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal-content input, .modal-content textarea {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .datetime {
+  font-size: 12px; /* Ukuran teks lebih kecil */
+  color: #cbcbcb; /* Warna teks abu-abu gelap */
+  margin-top: 5px;
+  text-align: right; /* Posisi di kanan */
+}
+
+  </style>
+</head>
+<body>
+
+
+
+  <header>
+    <h1>Catat Tugas Sekolah</h1>
+    <div class="datetime" id="datetime"></div>
+  </header>
+
+  <nav>
+    <button class="tab-btn active" onclick="showPage(event, 'lihat')">📋 Lihat Tugas</button>
+    <button class="tab-btn" onclick="showPage(event, 'tambah')">➕ Tambah Tugas</button>
+  </nav>
+
+  <div class="page active" id="lihat">
+    <h2>Daftar Tugas</h2>
+    <div class="task-list" id="taskList"></div>
+  </div>
+
+  <div class="page" id="tambah">
+    <h2>Tambah Tugas Baru</h2>
+    <form class="task-form" onsubmit="addTask(event)">
+      <input type="text" id="judul" placeholder="Judul Tugas" required />
+      <textarea id="deskripsi" rows="4" placeholder="Deskripsi tugas..."></textarea>
+      <input type="date" id="deadline" required />
+      <button type="submit">Simpan Tugas</button>
+    </form>
+  </div>
+
+ <footer>
+  Dibuat oleh Fardan Rendara • © 2025<br>
+  Versi 1.1.0
+</footer>
+
+
+  <!-- Modal Edit -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>Edit Tugas</h3>
+      <input type="text" id="editJudul" />
+      <textarea id="editDeskripsi" rows="4"></textarea>
+      <input type="date" id="editDeadline" />
+      <button onclick="updateTask()">Simpan Perubahan</button>
+    </div>
+  </div>
+
+  <script>
+    const datetimeEl = document.getElementById('datetime');
+    const taskListEl = document.getElementById('taskList');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const pages = document.querySelectorAll('.page');
+    const editModal = document.getElementById('editModal');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    let currentEditIndex = null;
+
+    function updateDateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      datetimeEl.textContent = now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    function showPage(event, id) {
+      pages.forEach(p => p.classList.remove('active'));
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function renderTasks() {
+      taskListEl.innerHTML = '';
+      const today = new Date().toISOString().split('T')[0];
+
+      tasks.forEach((task, index) => {
+        const isToday = task.deadline === today;
+        const card = document.createElement('div');
+        card.className = 'task-card' + (isToday ? ' today' : '');
+        card.innerHTML = `
+  <h3>${task.judul}</h3>
+  <p>${task.deskripsi}</p>
+  <small>Dikumpulkan pada hari: ${new Date(task.deadline).toLocaleDateString('id-ID', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  })}</small>
+  <div class="task-actions">
+    <button class="edit-btn" onclick="openEditModal(${index})">Edit</button>
+    <button class="delete-btn" onclick="deleteTask(${index})">Hapus</button>
+  </div>
+`;
+
+        taskListEl.appendChild(card);
+      });
+    }
+
+    function addTask(e) {
+      e.preventDefault();
+      const judul = document.getElementById('judul').value;
+      const deskripsi = document.getElementById('deskripsi').value;
+      const deadline = document.getElementById('deadline').value;
+
+      tasks.push({ judul, deskripsi, deadline });
+      saveTasks();
+      renderTasks();
+
+      e.target.reset();
+      showPage({ target: document.querySelector('[onclick*="lihat"]') }, 'lihat');
+    }
+
+    function deleteTask(index) {
+      if (confirm("Yakin ingin menghapus tugas ini?")) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+      }
+    }
+
+    function openEditModal(index) {
+      currentEditIndex = index;
+      const task = tasks[index];
+      document.getElementById('editJudul').value = task.judul;
+      document.getElementById('editDeskripsi').value = task.deskripsi;
+      document.getElementById('editDeadline').value = task.deadline;
+      editModal.classList.add('show');
+    }
+
+    function updateTask() {
+      const judul = document.getElementById('editJudul').value;
+      const deskripsi = document.getElementById('editDeskripsi').value;
+      const deadline = document.getElementById('editDeadline').value;
+
+      tasks[currentEditIndex] = { judul, deskripsi, deadline };
+      saveTasks();
+      renderTasks();
+      editModal.classList.remove('show');
+    }
+
+    // Tutup modal jika klik di luar
+    window.onclick = function(e) {
+      if (e.target === editModal) {
+        editModal.classList.remove('show');
+      }
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
