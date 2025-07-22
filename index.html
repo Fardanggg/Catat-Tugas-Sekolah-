@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -255,108 +253,111 @@
   </div>
 
   <script>
-    const datetimeEl = document.getElementById('datetime');
-    const taskListEl = document.getElementById('taskList');
-    const tabButtons = document.querySelectorAll('.tab-btn');
-    const pages = document.querySelectorAll('.page');
-    const editModal = document.getElementById('editModal');
+  const datetimeEl = document.getElementById('datetime');
+  const taskListEl = document.getElementById('taskList');
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const pages = document.querySelectorAll('.page');
+  const editModal = document.getElementById('editModal');
 
-    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    let currentEditIndex = null;
+  let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  let currentEditIndex = null;
 
-    function updateDateTime() {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      datetimeEl.textContent = now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
-    }
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
+  function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    datetimeEl.textContent = now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
+  }
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
 
-    function showPage(event, id) {
-      pages.forEach(p => p.classList.remove('active'));
-      tabButtons.forEach(btn => btn.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      event.target.classList.add('active');
-    }
+  function showPage(event, id) {
+    pages.forEach(p => p.classList.remove('active'));
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
 
-    function saveTasks() {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
+  function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
 
-    function renderTasks() {
-      taskListEl.innerHTML = '';
-      const today = new Date().toISOString().split('T')[0];
+  function renderTasks() {
+    taskListEl.innerHTML = '';
+    const today = new Date().toISOString().split('T')[0];
 
-      tasks.forEach((task, index) => {
-        const isToday = task.deadline === today;
-        const card = document.createElement('div');
-        card.className = 'task-card' + (isToday ? ' today' : '');
-        card.innerHTML = `
-  <h3>${task.judul}</h3>
-  <p>${task.deskripsi}</p>
-  <small>Dikumpulkan pada hari: ${new Date(task.deadline).toLocaleDateString('id-ID', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-  })}</small>
-  <div class="task-actions">
-    <button class="edit-btn" onclick="openEditModal(${index})">Edit</button>
-    <button class="delete-btn" onclick="deleteTask(${index})">Hapus</button>
-  </div>
-`;
+    // Urutkan berdasarkan deadline terdekat
+    const sortedTasks = [...tasks].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
 
-        taskListEl.appendChild(card);
-      });
-    }
+    sortedTasks.forEach((task) => {
+      const isToday = task.deadline === today;
+      const card = document.createElement('div');
+      card.className = 'task-card' + (isToday ? ' today' : '');
+      card.innerHTML = `
+        <h3>${task.judul}</h3>
+        <p>${task.deskripsi}</p>
+        <small>Dikumpulkan pada hari: ${new Date(task.deadline).toLocaleDateString('id-ID', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        })}</small>
+        <div class="task-actions">
+          <button class="edit-btn" onclick="openEditModal(${tasks.indexOf(task)})">Edit</button>
+          <button class="delete-btn" onclick="deleteTask(${tasks.indexOf(task)})">Hapus</button>
+        </div>
+      `;
+      taskListEl.appendChild(card);
+    });
+  }
 
-    function addTask(e) {
-      e.preventDefault();
-      const judul = document.getElementById('judul').value;
-      const deskripsi = document.getElementById('deskripsi').value;
-      const deadline = document.getElementById('deadline').value;
+  function addTask(e) {
+    e.preventDefault();
+    const judul = document.getElementById('judul').value;
+    const deskripsi = document.getElementById('deskripsi').value;
+    const deadline = document.getElementById('deadline').value;
 
-      tasks.push({ judul, deskripsi, deadline });
+    tasks.push({ judul, deskripsi, deadline });
+    saveTasks();
+    renderTasks();
+
+    e.target.reset();
+    showPage({ target: document.querySelector('[onclick*="lihat"]') }, 'lihat');
+  }
+
+  function deleteTask(index) {
+    if (confirm("Yakin ingin menghapus tugas ini?")) {
+      tasks.splice(index, 1);
       saveTasks();
       renderTasks();
-
-      e.target.reset();
-      showPage({ target: document.querySelector('[onclick*="lihat"]') }, 'lihat');
     }
+  }
 
-    function deleteTask(index) {
-      if (confirm("Yakin ingin menghapus tugas ini?")) {
-        tasks.splice(index, 1);
-        saveTasks();
-        renderTasks();
-      }
-    }
+  function openEditModal(index) {
+    currentEditIndex = index;
+    const task = tasks[index];
+    document.getElementById('editJudul').value = task.judul;
+    document.getElementById('editDeskripsi').value = task.deskripsi;
+    document.getElementById('editDeadline').value = task.deadline;
+    editModal.classList.add('show');
+  }
 
-    function openEditModal(index) {
-      currentEditIndex = index;
-      const task = tasks[index];
-      document.getElementById('editJudul').value = task.judul;
-      document.getElementById('editDeskripsi').value = task.deskripsi;
-      document.getElementById('editDeadline').value = task.deadline;
-      editModal.classList.add('show');
-    }
+  function updateTask() {
+    const judul = document.getElementById('editJudul').value;
+    const deskripsi = document.getElementById('editDeskripsi').value;
+    const deadline = document.getElementById('editDeadline').value;
 
-    function updateTask() {
-      const judul = document.getElementById('editJudul').value;
-      const deskripsi = document.getElementById('editDeskripsi').value;
-      const deadline = document.getElementById('editDeadline').value;
+    tasks[currentEditIndex] = { judul, deskripsi, deadline };
+    saveTasks();
+    renderTasks();
+    editModal.classList.remove('show');
+  }
 
-      tasks[currentEditIndex] = { judul, deskripsi, deadline };
-      saveTasks();
-      renderTasks();
+  window.onclick = function(e) {
+    if (e.target === editModal) {
       editModal.classList.remove('show');
     }
+  }
 
-    // Tutup modal jika klik di luar
-    window.onclick = function(e) {
-      if (e.target === editModal) {
-        editModal.classList.remove('show');
-      }
-    }
+  renderTasks();
+</script>
 
-    renderTasks();
-  </script>
+
 </body>
 </html>
