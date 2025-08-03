@@ -26,13 +26,18 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    /* Perbaikan utama untuk scrolling */
+    body, html {
+      height: 100%;
+      overflow-y: hidden; /* Menyembunyikan scroll bar di tingkat body/html */
+    }
+
     body {
       background: var(--light-gray);
       color: var(--text-color);
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      overflow-y: auto;
     }
 
     header {
@@ -43,6 +48,7 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0; /* Mencegah header mengecil */
     }
 
     header h1 {
@@ -62,6 +68,7 @@
       background: #fff;
       box-shadow: var(--shadow-light);
       border-bottom: 1px solid var(--border-color);
+      flex-shrink: 0; /* Mencegah nav mengecil */
     }
 
     .tab-btn {
@@ -97,12 +104,14 @@
       border-radius: 5px;
     }
 
+    /* Mengaktifkan scrolling di sini */
     main {
       padding: 20px;
-      flex-grow: 1;
+      flex-grow: 1; /* Mengisi sisa ruang vertikal */
       max-width: 800px;
       width: 100%;
       margin: 0 auto;
+      overflow-y: auto; /* Memungkinkan scrolling vertikal */
     }
 
     .page {
@@ -219,6 +228,7 @@
       font-size: 0.8rem;
       margin-top: auto;
       color: #666;
+      flex-shrink: 0; /* Mencegah footer mengecil */
     }
 
     /* Modal Styling */
