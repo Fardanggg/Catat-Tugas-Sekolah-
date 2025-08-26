@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catatan Tugas Sekolah</title>
   <style>
-    /* Variabel CSS untuk kemudahan kustomisasi tema */
     :root {
       --primary-color: #1e88e5;
       --secondary-color: #e3f2fd;
@@ -18,278 +17,61 @@
       --success-color: #4caf50;
     }
 
-    /* Mengatur font global dan box-sizing */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body, html { height: 100%; overflow-y: hidden; }
+    body { background: var(--light-gray); color: var(--text-color); display:flex; flex-direction:column; min-height:100vh; }
+    header { background: var(--primary-color); color: white; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,.2); flex-shrink:0; }
+    header h1 { font-size:1.5rem; font-weight:700; }
+    .datetime { font-size:0.9rem; color:#e3f2fd; text-align:right; }
 
-    /* Perbaikan utama untuk scrolling */
-    body, html {
-      height: 100%;
-      overflow-y: hidden; /* Menyembunyikan scroll bar di tingkat body/html */
-    }
+    nav { display:flex; justify-content:center; background:#fff; box-shadow:var(--shadow-light); border-bottom:1px solid var(--border-color); flex-shrink:0; }
+    .tab-btn { flex:1; padding:14px; background:none; border:none; cursor:pointer; font-size:1rem; font-weight:500; color:#555; position:relative; transition:all .3s; }
+    .tab-btn:hover { color:var(--primary-color); }
+    .tab-btn.active { color:var(--primary-color); font-weight:700; }
+    .tab-btn.active::after { content:""; position:absolute; left:20%; bottom:0; width:60%; height:3px; background:var(--primary-color); border-radius:5px; }
 
-    body {
-      background: var(--light-gray);
-      color: var(--text-color);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
+    main { padding:20px; flex-grow:1; max-width:800px; width:100%; margin:0 auto; overflow-y:auto; }
+    .page { display:none; animation:fadeIn .4s ease-in; }
+    .page.active { display:block; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-    header {
-      background: var(--primary-color);
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-      flex-shrink: 0; /* Mencegah header mengecil */
-    }
+    .task-form { display:flex; flex-direction:column; gap:10px; margin:20px auto 0; }
+    input, textarea, button { padding:12px; border-radius:6px; border:1px solid #ccc; font-size:1rem; width:100%; }
+    button { background:var(--primary-color); color:white; border:none; cursor:pointer; transition:background .3s, transform .2s; }
+    button:hover { background:#1565c0; }
+    button:active { transform:scale(.98); }
 
-    header h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
+    .task-list { margin-top:20px; }
+    .task-card { background:white; padding:20px; border-radius:10px; margin-bottom:15px; box-shadow:var(--shadow-card); position:relative; transition:transform .2s ease, box-shadow .2s ease; }
+    .task-card:hover { transform:translateY(-3px); }
+    .task-card.today { border-left:5px solid var(--danger-color); background-color:#fff4f4; }
+    .task-card h3 { margin-bottom:5px; font-size:1.2rem; }
+    .task-card p { color:#555; font-size:.95rem; margin-top:5px; }
+    .task-card small { color:#888; display:block; margin-top:10px; font-style:italic; }
+    .task-actions { margin-top:15px; display:flex; justify-content:flex-end; gap:10px; }
+    .task-actions .edit-btn, .task-actions .delete-btn { padding:8px 12px; font-size:.9rem; width:auto; }
+    .task-actions .alarm-toggle-btn { padding:8px 12px; font-size:.9rem; width:auto; background:#ff9800; color:white; }
+    .task-actions .edit-btn { background:#2196f3; }
+    .task-actions .delete-btn { background:var(--danger-color); }
 
-    .datetime {
-      font-size: 0.9rem;
-      color: #e3f2fd;
-      text-align: right;
-    }
+    footer { text-align:center; padding:15px; background:var(--secondary-color); font-size:.8rem; margin-top:auto; color:#666; flex-shrink:0; }
 
-    nav {
-      display: flex;
-      justify-content: center;
-      background: #fff;
-      box-shadow: var(--shadow-light);
-      border-bottom: 1px solid var(--border-color);
-      flex-shrink: 0; /* Mencegah nav mengecil */
-    }
+    .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.6); display:none; justify-content:center; align-items:center; z-index:1000; }
+    .modal.show { display:flex; }
+    .modal-content { background:white; padding:25px; border-radius:10px; width:90%; max-width:450px; box-shadow:0 5px 15px rgba(0,0,0,.3); position:relative; }
+    .modal-content h3 { margin-bottom:20px; }
+    .modal-content input, .modal-content textarea { margin-bottom:15px; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+    .modal-actions button { width:auto; padding:10px 20px; }
+    .close-modal-btn { background:#6c757d; }
+    .confirm-modal-actions .confirm-btn { background:var(--danger-color); }
+    .confirm-modal-actions .cancel-btn { background:#6c757d; }
 
-    .tab-btn {
-      flex: 1;
-      padding: 14px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #555;
-      position: relative;
-      transition: all 0.3s ease;
-    }
-
-    .tab-btn:hover {
-      color: var(--primary-color);
-    }
-
-    .tab-btn.active {
-      color: var(--primary-color);
-      font-weight: bold;
-    }
-
-    .tab-btn.active::after {
-      content: "";
-      position: absolute;
-      left: 20%;
-      bottom: 0;
-      width: 60%;
-      height: 3px;
-      background: var(--primary-color);
-      border-radius: 5px;
-    }
-
-    /* Mengaktifkan scrolling di sini */
-    main {
-      padding: 20px;
-      flex-grow: 1; /* Mengisi sisa ruang vertikal */
-      max-width: 800px;
-      width: 100%;
-      margin: 0 auto;
-      overflow-y: auto; /* Memungkinkan scrolling vertikal */
-    }
-
-    .page {
-      display: none;
-      animation: fadeIn 0.4s ease-in;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .task-form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin: 20px auto 0;
-    }
-
-    input, textarea, button {
-      padding: 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      width: 100%;
-    }
-
-    button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-      background-color: #1565c0;
-    }
-
-    button:active {
-      transform: scale(0.98);
-    }
-
-    .task-list {
-      margin-top: 20px;
-    }
-
-    .task-card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: var(--shadow-card);
-      position: relative;
-      transition: transform 0.2s ease;
-    }
-
-    .task-card:hover {
-      transform: translateY(-3px);
-    }
-
-    .task-card.today {
-      border-left: 5px solid var(--danger-color);
-      background-color: #fff4f4;
-    }
-
-    .task-card h3 {
-      margin-bottom: 5px;
-      font-size: 1.2rem;
-    }
-
-    .task-card p {
-      color: #555;
-      font-size: 0.95rem;
-      margin-top: 5px;
-    }
-
-    .task-card small {
-      color: #888;
-      display: block;
-      margin-top: 10px;
-      font-style: italic;
-    }
-
-    .task-actions {
-      margin-top: 15px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-
-    .task-actions .edit-btn, .task-actions .delete-btn {
-      padding: 8px 12px;
-      font-size: 0.9rem;
-      width: auto;
-    }
-
-    .task-actions .edit-btn {
-      background-color: #2196f3;
-    }
-
-    .task-actions .delete-btn {
-      background-color: var(--danger-color);
-    }
-
-    footer {
-      text-align: center;
-      padding: 15px;
-      background: var(--secondary-color);
-      font-size: 0.8rem;
-      margin-top: auto;
-      color: #666;
-      flex-shrink: 0; /* Mencegah footer mengecil */
-    }
-
-    /* Modal Styling */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal.show {
-      display: flex;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 25px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 450px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-      position: relative;
-    }
-
-    .modal-content h3 {
-      margin-bottom: 20px;
-    }
-
-    .modal-content input, .modal-content textarea {
-      margin-bottom: 15px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 20px;
-    }
-
-    .modal-actions button {
-      width: auto;
-      padding: 10px 20px;
-    }
-
-    .close-modal-btn {
-      background-color: #6c757d;
-    }
-
-    .confirm-modal-actions .confirm-btn {
-        background-color: var(--danger-color);
-    }
-
-    .confirm-modal-actions .cancel-btn {
-        background-color: #6c757d;
-    }
+    /* Alarm visuals */
+    .alarm-ringing { animation:pulse-shadow 1s ease-in-out infinite; transform:scale(1.02); }
+    @keyframes pulse-shadow { 0% { box-shadow:0 0 0 0 rgba(229,57,53,0.15);} 70% { box-shadow:0 0 0 12px rgba(229,57,53,0);} 100% { box-shadow:0 0 0 0 rgba(229,57,53,0);} }
+    .alarm-label { display:inline-block; padding:6px 8px; border-radius:6px; background:#fff2f2; color:var(--danger-color); font-weight:600; margin-left:8px; font-size:.85rem; }
+    .small-muted { color:#666; font-size:.9rem; margin-top:6px; display:block; }
   </style>
 </head>
 <body>
@@ -316,6 +98,8 @@
         <input type="text" id="judul" placeholder="Judul Tugas" required />
         <textarea id="deskripsi" rows="4" placeholder="Deskripsi tugas..."></textarea>
         <input type="date" id="deadline" required />
+        <label class="small-muted">Alarm (opsional) — pilih tanggal & waktu</label>
+        <input type="datetime-local" id="alarm" />
         <button type="submit">Simpan Tugas</button>
       </form>
     </div>
@@ -323,7 +107,7 @@
 
   <footer>
     <p>Dibuat oleh Fardan Rendara • © 2025</p>
-    <p>Versi 1.3.0</p>
+    <p>Versi 1.5.0</p>
   </footer>
 
   <!-- Modal Edit -->
@@ -334,6 +118,8 @@
         <input type="text" id="editJudul" required />
         <textarea id="editDeskripsi" rows="4"></textarea>
         <input type="date" id="editDeadline" required />
+        <label class="small-muted">Alarm (opsional) — pilih tanggal & waktu</label>
+        <input type="datetime-local" id="editAlarm" />
         <div class="modal-actions">
             <button type="submit">Simpan Perubahan</button>
             <button type="button" class="close-modal-btn" id="closeEditModalBtn">Batal</button>
@@ -355,6 +141,7 @@
   </div>
 
   <script>
+    // Elemen DOM
     const datetimeEl = document.getElementById('datetime');
     const taskListEl = document.getElementById('taskList');
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -364,207 +151,382 @@
     const editForm = document.getElementById('editForm');
     const confirmModal = document.getElementById('confirmModal');
 
+    // State
     let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
     let currentEditIndex = null;
     let pendingDeleteIndex = null;
 
-    /**
-     * Mengelola navigasi tab.
-     */
-    function setupTabNavigation() {
-        tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Menghapus kelas 'active' dari semua tab dan halaman
-                tabButtons.forEach(b => b.classList.remove('active'));
-                pages.forEach(p => p.classList.remove('active'));
+    // Alarm & audio state
+    const alarmTimeouts = {};
+    const activeBeeps = {};
+    let audioContext = null;
+    let soundEnabled = false;
 
-                // Menambahkan kelas 'active' pada tab dan halaman yang dipilih
-                btn.classList.add('active');
-                document.getElementById(btn.dataset.page).classList.add('active');
-            });
-        });
+    // Helpers
+    function ensureAudioContext() {
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    async function resumeAudioIfNeeded() {
+      ensureAudioContext();
+      if (audioContext.state === 'suspended') {
+        try { await audioContext.resume(); soundEnabled = true; } catch(e) { soundEnabled = false; }
+      } else {
+        soundEnabled = true;
+      }
     }
 
-    /**
-     * Memperbarui tanggal dan waktu setiap detik.
-     */
+    function formatLocalForDatetimeInput(date) {
+      const tzOffset = date.getTimezoneOffset() * 60000;
+      const localISO = new Date(date - tzOffset).toISOString().slice(0,16);
+      return localISO;
+    }
+
+    // Beep loop
+    function playContinuousBeep(index) {
+        if (!activeBeeps[index]) return; // Stop if alarm is disabled
+        ensureAudioContext();
+        if (soundEnabled || audioContext.state === 'running') {
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 700;
+            gain.gain.value = 0.0001;
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+
+            const now = audioContext.currentTime;
+            gain.gain.exponentialRampToValueAtTime(0.6, now + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.55);
+        }
+    }
+
+    function startBeepLoop(index) {
+      if (activeBeeps[index]) return; // Avoid multiple loops
+      
+      playContinuousBeep(index); // Play the first beep immediately
+      const iv = setInterval(() => playContinuousBeep(index), 700);
+      activeBeeps[index] = iv;
+      renderTasks(); // Add this line to re-render and show the 'Matikan Alarm' button
+    }
+
+    function stopAlarmBeep(index) {
+      if (activeBeeps[index]) {
+        clearInterval(activeBeeps[index]);
+        delete activeBeeps[index];
+      }
+      const card = taskListEl.querySelector(`.task-card[data-index="${index}"]`);
+      if (card) {
+        card.classList.remove('alarm-ringing');
+      }
+      if (navigator.vibrate) navigator.vibrate(0);
+      renderTasks(); // Add this line to re-render and hide the 'Matikan Alarm' button
+    }
+
+    async function ensureNotificationPermission() {
+      if (!('Notification' in window)) return false;
+      if (Notification.permission === 'granted') return true;
+      if (Notification.permission !== 'denied') {
+        const p = await Notification.requestPermission();
+        return p === 'granted';
+      }
+      return false;
+    }
+
+    // Tabs
+    function setupTabNavigation() {
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabButtons.forEach(b => b.classList.remove('active'));
+          pages.forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(btn.dataset.page).classList.add('active');
+        });
+      });
+    }
+
+    // Date/time header
     function updateDateTime() {
       const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const options = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
       datetimeEl.textContent = now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
     }
 
-    /**
-     * Menyimpan data tugas ke Local Storage.
-     */
-    function saveTasks() {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
+    // Storage
+    function saveTasks() { localStorage.setItem('tasks', JSON.stringify(tasks)); }
 
-    /**
-     * Merender (menampilkan) daftar tugas ke halaman.
-     */
+    // Rendering
     function renderTasks() {
       taskListEl.innerHTML = '';
       const today = new Date().toISOString().split('T')[0];
-    
-      // Mengurutkan tugas berdasarkan deadline terdekat
-      const sortedTasks = [...tasks].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-    
-      sortedTasks.forEach((task, index) => {
+      const sortedTasks = [...tasks].sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+
+      sortedTasks.forEach((task) => {
+        const originalIndex = tasks.findIndex(t => t === task);
         const isToday = task.deadline === today;
         const card = document.createElement('div');
-        // Menggunakan index dari array asli untuk identifikasi, bukan sortedTasks
-        const originalIndex = tasks.findIndex(t => t === task); 
         card.className = `task-card ${isToday ? 'today' : ''}`;
+        card.dataset.index = originalIndex;
+
+        const alarmInfo = task.alarmTime
+          ? `<span class="alarm-label">Alarm: ${new Date(task.alarmTime).toLocaleString('id-ID')}</span>`
+          : '';
+
+        const alarmToggleBtn = activeBeeps[originalIndex]
+          ? `<button class="alarm-toggle-btn" data-index="${originalIndex}">Matikan Alarm</button>`
+          : '';
+
         card.innerHTML = `
-          <h3>${task.judul}</h3>
-          <p>${task.deskripsi}</p>
+          <h3>${escapeHtml(task.judul || '')} ${alarmInfo}</h3>
+          <p>${escapeHtml(task.deskripsi || '')}</p>
           <small>Deadline: ${new Date(task.deadline).toLocaleDateString('id-ID', {
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
           })}</small>
           <div class="task-actions">
             <button class="edit-btn" data-index="${originalIndex}">Edit</button>
             <button class="delete-btn" data-index="${originalIndex}">Hapus</button>
+            ${alarmToggleBtn}
           </div>
         `;
         taskListEl.appendChild(card);
       });
+
+      // schedule alarms based on current tasks
+      scheduleAlarms();
     }
 
-    /**
-     * Menangani pengiriman form untuk menambah tugas baru.
-     */
-    function handleAddTask(e) {
-      e.preventDefault();
-      const judul = document.getElementById('judul').value;
-      const deskripsi = document.getElementById('deskripsi').value;
-      const deadline = document.getElementById('deadline').value;
+    // Escape HTML simple helper to avoid injection when rendering content
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
 
-      tasks.push({ judul, deskripsi, deadline });
+    // Add task handler (fixed + validation + logs)
+    function handleAddTask(e) {
+      try {
+        e.preventDefault();
+
+        const judulEl = document.getElementById('judul');
+        const deskripsiEl = document.getElementById('deskripsi');
+        const deadlineEl = document.getElementById('deadline');
+        const alarmEl = document.getElementById('alarm');
+
+        const judul = judulEl.value.trim();
+        const deskripsi = deskripsiEl.value.trim();
+        const deadline = deadlineEl.value;
+
+        if (!judul) { alert('Mohon isi Judul Tugas.'); judulEl.focus(); return; }
+        if (!deadline) { alert('Mohon pilih Deadline (tanggal).'); deadlineEl.focus(); return; }
+
+        const alarmVal = alarmEl ? alarmEl.value : '';
+        let alarmTime = null;
+        let alarmEnabled = false;
+        if (alarmVal) {
+          const dt = new Date(alarmVal);
+          if (!isNaN(dt.getTime())) {
+            alarmTime = dt.toISOString();
+            alarmEnabled = true;
+            ensureNotificationPermission().catch(()=>{});
+          } else {
+            alert('Format Alarm tidak valid. Tugas akan dibuat tanpa alarm.');
+          }
+        }
+
+        tasks.push({ judul, deskripsi, deadline, alarmTime, alarmEnabled });
+        saveTasks();
+
+        renderTasks();
+        taskForm.reset();
+        document.querySelector('.tab-btn[data-page="lihat"]').click();
+
+        resumeAudioIfNeeded().catch(err => console.warn('resumeAudio error', err));
+      } catch (err) {
+        console.error('Error di handleAddTask:', err);
+        alert('Terjadi kesalahan saat menambah tugas. Buka console (F12) untuk detail.');
+      }
+    }
+
+    // Delete task
+    function deleteTask(index) {
+      index = Number(index);
+      // clear timeouts & beeps for that index (if any)
+      if (alarmTimeouts[index]) { clearTimeout(alarmTimeouts[index]); delete alarmTimeouts[index]; }
+      stopAlarmBeep(index);
+      tasks.splice(index, 1);
       saveTasks();
       renderTasks();
-
-      // Reset form dan pindah ke tab 'Lihat Tugas'
-      taskForm.reset();
-      document.querySelector('.tab-btn[data-page="lihat"]').click();
     }
 
-    /**
-     * Menghapus tugas berdasarkan indeks.
-     */
-    function deleteTask(index) {
-        tasks.splice(index, 1);
-        saveTasks();
-        renderTasks();
-    }
-
-    /**
-     * Menampilkan modal edit dengan data tugas yang dipilih.
-     */
+    // Edit modal
     function openEditModal(index) {
-      currentEditIndex = index;
-      const task = tasks[index];
-      document.getElementById('editJudul').value = task.judul;
-      document.getElementById('editDeskripsi').value = task.deskripsi;
-      document.getElementById('editDeadline').value = task.deadline;
+      currentEditIndex = Number(index);
+      const task = tasks[currentEditIndex];
+      if (!task) return;
+      document.getElementById('editJudul').value = task.judul || '';
+      document.getElementById('editDeskripsi').value = task.deskripsi || '';
+      document.getElementById('editDeadline').value = task.deadline || '';
+      if (task.alarmTime) {
+        const dt = new Date(task.alarmTime);
+        document.getElementById('editAlarm').value = formatLocalForDatetimeInput(dt);
+      } else {
+        document.getElementById('editAlarm').value = '';
+      }
       editModal.classList.add('show');
     }
 
-    /**
-     * Menutup modal edit.
-     */
-    function closeEditModal() {
-        editModal.classList.remove('show');
-    }
+    function closeEditModal() { editModal.classList.remove('show'); }
 
-    /**
-     * Menangani pengiriman form untuk memperbarui tugas.
-     */
     function handleUpdateTask(e) {
       e.preventDefault();
-      const judul = document.getElementById('editJudul').value;
-      const deskripsi = document.getElementById('editDeskripsi').value;
+      const judul = document.getElementById('editJudul').value.trim();
+      const deskripsi = document.getElementById('editDeskripsi').value.trim();
       const deadline = document.getElementById('editDeadline').value;
+      const alarmVal = document.getElementById('editAlarm').value;
 
-      tasks[currentEditIndex] = { judul, deskripsi, deadline };
+      if (!judul) { alert('Mohon isi Judul Tugas.'); return; }
+      if (!deadline) { alert('Mohon pilih Deadline (tanggal).'); return; }
+
+      let alarmTime = null;
+      let alarmEnabled = false;
+      if (alarmVal) {
+        const dt = new Date(alarmVal);
+        if (!isNaN(dt.getTime())) {
+          alarmTime = dt.toISOString();
+          alarmEnabled = true;
+          ensureNotificationPermission().catch(()=>{});
+        } else {
+          alert('Format Alarm edit tidak valid. Alarm akan dihapus.');
+        }
+      }
+
+      tasks[currentEditIndex] = { judul, deskripsi, deadline, alarmTime, alarmEnabled };
       saveTasks();
       renderTasks();
       closeEditModal();
+
+      resumeAudioIfNeeded().catch(()=>{});
     }
 
-    /**
-     * Menampilkan modal konfirmasi untuk hapus.
-     */
-    function showConfirmModal(index) {
-        pendingDeleteIndex = index;
-        confirmModal.classList.add('show');
-    }
+    // Confirm delete modal
+    function showConfirmModal(index) { pendingDeleteIndex = Number(index); confirmModal.classList.add('show'); }
+    function closeConfirmModal() { pendingDeleteIndex = null; confirmModal.classList.remove('show'); }
 
-    /**
-     * Menutup modal konfirmasi.
-     */
-    function closeConfirmModal() {
-        pendingDeleteIndex = null;
-        confirmModal.classList.remove('show');
-    }
+    // Schedule alarms (clears previous schedules and reschedules)
+    function scheduleAlarms() {
+      // clear previous timeouts
+      for (const k in alarmTimeouts) {
+        try { clearTimeout(alarmTimeouts[k]); } catch(e){}
+        delete alarmTimeouts[k];
+      }
 
-    /**
-     * Menginisialisasi event listeners.
-     */
-    function init() {
-      // Event listener untuk tombol navigasi
-      setupTabNavigation();
-
-      // Event listener untuk form tambah tugas
-      taskForm.addEventListener('submit', handleAddTask);
-    
-      // Event listener untuk tombol Edit dan Hapus (menggunakan event delegation)
-      taskListEl.addEventListener('click', (e) => {
-          if (e.target.classList.contains('edit-btn')) {
-              const index = e.target.dataset.index;
-              openEditModal(index);
-          } else if (e.target.classList.contains('delete-btn')) {
-              const index = e.target.dataset.index;
-              showConfirmModal(index);
+      tasks.forEach((task, index) => {
+        if (task.alarmEnabled && task.alarmTime) {
+          const target = new Date(task.alarmTime).getTime();
+          const now = Date.now();
+          const diff = target - now;
+          if (diff <= 0) {
+            // if time passed, trigger asap
+            triggerAlarm(index);
+          } else {
+            const toId = setTimeout(() => triggerAlarm(index), diff);
+            alarmTimeouts[index] = toId;
           }
+        }
       });
+    }
+
+    // Trigger alarm (visual + notif + sound)
+    async function triggerAlarm(index) {
+      index = Number(index);
+      const task = tasks[index];
+      if (!task) return;
       
-      // Event listener untuk form edit tugas
+      const card = taskListEl.querySelector(`.task-card[data-index="${index}"]`);
+      if (card) {
+        card.classList.add('alarm-ringing');
+        card.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('⏰ Alarm Tugas', { body: `${task.judul} — ${task.deskripsi || 'Tidak ada deskripsi'}`, tag: 'task-alarm-' + index, renotify: true });
+        } catch(e) { console.warn('Notif gagal', e); }
+      }
+
+      if (navigator.vibrate) navigator.vibrate([300,150,300]);
+
+      await resumeAudioIfNeeded();
+      startBeepLoop(index);
+    }
+
+    // Disable alarm for a specific task (called by Matikan Alarm)
+    function disableAlarmForTask(index) {
+      index = Number(index);
+      const task = tasks[index];
+      if (!task) return;
+      
+      // Stop the sound and clear the visual state
+      stopAlarmBeep(index);
+      
+      // Permanently disable the alarm by updating the task state
+      task.alarmEnabled = false;
+      task.alarmTime = null;
+      saveTasks();
+      renderTasks();
+    }
+
+    // Init
+    function init() {
+      setupTabNavigation();
+      taskForm.addEventListener('submit', handleAddTask);
+      taskListEl.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.classList.contains('edit-btn')) {
+          openEditModal(target.dataset.index);
+        } else if (target.classList.contains('delete-btn')) {
+          showConfirmModal(target.dataset.index);
+        } else if (target.classList.contains('alarm-toggle-btn')) {
+          disableAlarmForTask(target.dataset.index);
+        }
+      });
+
       editForm.addEventListener('submit', handleUpdateTask);
-      
-      // Event listener untuk tombol batal di modal edit
       document.getElementById('closeEditModalBtn').addEventListener('click', closeEditModal);
 
-      // Event listener untuk modal konfirmasi
       confirmModal.querySelector('.confirm-btn').addEventListener('click', () => {
-          if (pendingDeleteIndex !== null) {
-              deleteTask(pendingDeleteIndex);
-          }
-          closeConfirmModal();
+        if (pendingDeleteIndex !== null) deleteTask(pendingDeleteIndex);
+        closeConfirmModal();
       });
-
       confirmModal.querySelector('.cancel-btn').addEventListener('click', closeConfirmModal);
 
-      // Event listener untuk menutup modal saat klik di luar area modal
       window.addEventListener('click', (e) => {
-          if (e.target === editModal) {
-              closeEditModal();
-          }
-          if (e.target === confirmModal) {
-              closeConfirmModal();
-          }
+        if (e.target === editModal) closeEditModal();
+        if (e.target === confirmModal) closeConfirmModal();
       });
 
-      // Memulai update waktu dan merender tugas pertama kali
       setInterval(updateDateTime, 1000);
       updateDateTime();
       renderTasks();
+
+      window.addEventListener('beforeunload', () => {
+        for (const k in activeBeeps) { try { clearInterval(activeBeeps[k]); } catch(e){} }
+        for (const k in alarmTimeouts) { try { clearTimeout(alarmTimeouts[k]); } catch(e){} }
+      });
+
+      // enable audio on first user click (gesture)
+      document.addEventListener('click', async function enableAudioOnFirstClick() {
+        await resumeAudioIfNeeded().catch(()=>{});
+        document.removeEventListener('click', enableAudioOnFirstClick);
+      }, { once: true });
     }
-    
-    // Panggil fungsi inisialisasi saat dokumen selesai dimuat
+
+    // start
     document.addEventListener('DOMContentLoaded', init);
   </script>
-
 </body>
 </html>
